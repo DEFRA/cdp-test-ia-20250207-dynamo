@@ -114,12 +114,30 @@ export const config = convict({
     default: isProduction,
     env: 'ENABLE_METRICS'
   },
+  aws: {
+    dynamodb: {
+      endpoint: {
+        doc: 'AWS DynamoDB endpoint',
+        format: String,
+        default: 'http://localhost:4566',
+        env: 'AWS_DYNAMODB_ENDPOINT'
+      }
+    },
+    region: {
+      doc: 'AWS region',
+      format: String,
+      default: 'eu-west-2',
+      env: 'AWS_REGION'
+    }
+  },
   session: {
     cache: {
       engine: {
         doc: 'backend cache is written to',
-        format: ['redis', 'memory'],
-        default: isProduction ? 'redis' : 'memory',
+        //   format: ['redis', 'memory'],
+        //   default: isProduction ? 'redis' : 'memory',
+        format: ['dynamodb', 'memory'],
+        default: !isProduction ? 'dynamodb' : 'memory',
         env: 'SESSION_CACHE_ENGINE'
       },
       name: {
