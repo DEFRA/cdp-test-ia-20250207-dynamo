@@ -14,7 +14,7 @@ import { config } from '~/src/config/config.js'
 const internals = {
   defaults: {
     endpoint: config.get('aws.dynamodb.endpoint'),
-    partition: 'catbox',
+    partition: config.get('aws.dynamodb.tableName'),
     ttl: config.get('session.cache.ttl'),
     region: config.get('aws.region'),
     readCapacityUnits: 5,
