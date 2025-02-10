@@ -52,6 +52,11 @@ export async function createServer() {
       strictHeader: false
     }
   })
+  server.storer = server.cache({
+    cache: config.get('session.cache.name'),
+    segment: 'some-segment',
+    expiresIn: config.get('session.cache.ttl')
+  })
   await server.register([
     requestLogger,
     requestTracing,

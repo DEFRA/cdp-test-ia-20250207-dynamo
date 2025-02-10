@@ -3,6 +3,7 @@ import {
   DynamoDBClient,
   CreateTableCommand,
   DeleteTableCommand,
+  DescribeTableCommand,
   GetItemCommand,
   PutItemCommand,
   DeleteItemCommand
@@ -42,6 +43,14 @@ export class CatboxDynamodb {
     return null
   }
 
+  async isReady() {
+    const command = new DescribeTableCommand({
+      TableName: this.settings.partition
+    })
+    const table = await this.client.send(command)
+    return table.Table.TableStatus === 'ACTIVE'
+  }
+
   async start() {
     if (!this.settings.createTable) {
       return
@@ -59,7 +68,7 @@ export class CatboxDynamodb {
     try {
       await this.client.send(command)
     } catch (err) {
-      if (err.code !== 'ResourceInUseException') {
+      if (err.name !== 'ResourceInUseException') {
         throw err
       }
     }
