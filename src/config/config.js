@@ -121,6 +121,12 @@ export const config = convict({
         format: String,
         default: 'http://localhost:4566',
         env: 'AWS_DYNAMODB_ENDPOINT'
+      },
+      tableName: {
+        doc: 'AWS DynamoDB table name',
+        format: String,
+        default: 'session-cache',
+        env: 'AWS_DYNAMODB_TABLE_NAME'
       }
     },
     region: {
@@ -137,7 +143,7 @@ export const config = convict({
         //   format: ['redis', 'memory'],
         //   default: isProduction ? 'redis' : 'memory',
         format: ['dynamodb', 'memory'],
-        default: !isProduction ? 'dynamodb' : 'memory',
+        default: isProduction ? 'dynamodb' : 'memory',
         env: 'SESSION_CACHE_ENGINE'
       },
       name: {
