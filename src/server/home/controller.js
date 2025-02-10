@@ -6,9 +6,11 @@
 export const homeController = {
   handler(request, h) {
     request.logger.info('Home page requested')
-    const homeTime = request.yar.get('home-time') ?? 'No home time set'
-    request.logger.info(`Existing Home time: ${homeTime}`)
-    request.yar.set('home-time', new Date().toISOString())
+    const homeTime = request.yar.get('home-times') ?? '[]'
+    const allTimes = JSON.parse(homeTime)
+    request.logger.info(`Existing Home times: ${homeTime}`)
+    allTimes.push(new Date().toISOString())
+    request.yar.set('home-times', JSON.stringify(allTimes))
     return h.view('home/index', {
       pageTitle: 'Home',
       heading: 'Home'
