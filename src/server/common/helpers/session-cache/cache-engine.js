@@ -8,7 +8,7 @@ import { config } from '~/src/config/config.js'
 import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 
 /**
- * @typedef {'redis' | 'memory'} Engine
+ * @typedef {'redis' | 'dynamodb' | 'memory'} Engine
  */
 
 /**

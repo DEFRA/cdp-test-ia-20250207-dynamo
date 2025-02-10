@@ -92,7 +92,7 @@ export const config = convict({
       format: Array,
       default: isProduction
         ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
-        : []
+        : ['req', 'res', 'responseTime']
     }
   },
   httpProxy: /** @type {SchemaObj<string | null>} */ ({
