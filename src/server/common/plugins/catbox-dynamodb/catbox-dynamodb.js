@@ -15,6 +15,7 @@ const internals = {
   defaults: {
     endpoint: config.get('aws.dynamodb.endpoint'),
     partition: config.get('aws.dynamodb.tableName'),
+    createTable: config.get('aws.dynamodb.createTable'),
     ttl: config.get('session.cache.ttl'),
     region: config.get('aws.region'),
     readCapacityUnits: 5,
@@ -42,6 +43,9 @@ export class CatboxDynamodb {
   }
 
   async start() {
+    if (!this.settings.createTable) {
+      return
+    }
     const command = new CreateTableCommand({
       TableName: this.settings.partition,
       KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],

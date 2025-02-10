@@ -122,6 +122,12 @@ export const config = convict({
         default: 'http://localhost:4566',
         env: 'AWS_DYNAMODB_ENDPOINT'
       },
+      createTable: {
+        doc: 'Create the table if it does not exist',
+        format: Boolean,
+        default: !isProduction,
+        env: 'AWS_DYNAMODB_CREATE_TABLE'
+      },
       tableName: {
         doc: 'AWS DynamoDB table name',
         format: String,
