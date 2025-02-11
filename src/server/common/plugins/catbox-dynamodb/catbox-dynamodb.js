@@ -46,12 +46,8 @@ export class CatboxDynamodb {
     return null
   }
 
-  async isReady() {
-    const command = new DescribeTableCommand({
-      TableName: this.settings.partition
-    })
-    const table = await this.client.send(command)
-    return table.Table.TableStatus === 'ACTIVE'
+  isReady() {
+    return this.client
   }
 
   async start() {
