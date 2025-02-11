@@ -13,17 +13,23 @@ export const homeController = {
     } else {
       throw new Error('Cache is not ready')
     }
-    const homeTime = await cache.get('home-times')
-    request.logger.info('Cache retrieved: ' + homeTime)
+    let homeTime
+    try {
+      homeTime = await cache.get('home-times')
+      request.logger.info('Cache retrieved: ' + homeTime)
+    } catch (err) {
+      request.logger.error('Error retrieving cache', err)
+      throw err
+    }
     let allTimes
     try {
       allTimes = homeTime ? JSON.parse(JSON.parse(homeTime).timestamps) : []
       request.logger.info(`Existing Home times: ${homeTime}`)
-      allTimes.push(new Date().toISOString())
     } catch (err) {
       request.logger.error('Error parsing cache', err)
-      allTimes = [new Date().toISOString()]
+      allTimes = []
     }
+    allTimes.push(new Date().toISOString())
     await cache.set(
       'home-times',
       JSON.stringify({ timestamps: JSON.stringify(allTimes) })
