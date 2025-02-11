@@ -1,14 +1,16 @@
 import { applyToDefaults } from '@hapi/hoek'
+import Boom from '@hapi/boom'
 import {
   DynamoDBClient,
   CreateTableCommand,
-  DeleteTableCommand,
-  DescribeTableCommand,
-  GetItemCommand,
-  PutItemCommand,
-  DeleteItemCommand
+  DescribeTableCommand
 } from '@aws-sdk/client-dynamodb'
-import Boom from '@hapi/boom'
+import {
+  DeleteCommand,
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand
+} from '@aws-sdk/lib-dynamodb'
 
 import { config } from '~/src/config/config.js'
 
@@ -31,6 +33,7 @@ export class CatboxDynamodb {
       region: this.settings.region,
       endpoint: this.settings.endpoint
     })
+    this.docClient = DynamoDBDocumentClient.from(this.client)
   }
 
   validateSegmentName(name) {
@@ -75,45 +78,46 @@ export class CatboxDynamodb {
   }
 
   async stop() {
-    const command = new DeleteTableCommand({
-      TableName: this.settings.partition
-    })
-    await this.client.send(command)
+    // intentionally empty
   }
 
   async get(key) {
-    const command = new GetItemCommand({
+    const command = new GetCommand({
       TableName: this.settings.partition,
-      Key: { id: key.segment }
+      Key: { id: key.id }
     })
 
-    const result = await this.client.send(command)
+    const result = await this.docClient.send(command)
     if (!result.Item) {
       return null
     }
-
-    return result.Item.item
+    const item = result.Item
+    return {
+      ...item,
+      ttl: item.expires - Date.now()
+    }
   }
 
   async set(key, value, ttl) {
-    const command = new PutItemCommand({
+    const command = new PutCommand({
       TableName: this.settings.partition,
       Item: {
-        id: key.segment,
+        id: key.id,
         item: value,
-        expires: Date.now() + ttl
+        stored: Date.now(),
+        expires: Date.now() + (ttl ?? this.settings.ttl)
       }
     })
 
-    await this.client.send(command)
+    await this.docClient.send(command)
   }
 
   async drop(key) {
-    const command = new DeleteItemCommand({
+    const command = new DeleteCommand({
       TableName: this.settings.partition,
-      Key: { id: key.segment }
+      Key: { id: key.id }
     })
 
-    await this.client.send(command)
+    await this.client.docClient(command)
   }
 }
