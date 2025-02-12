@@ -11,11 +11,13 @@ import {
   GetCommand,
   PutCommand
 } from '@aws-sdk/lib-dynamodb'
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers'
 
 import { config } from '~/src/config/config.js'
 
 const internals = {
   defaults: {
+    credentials: fromNodeProviderChain(),
     endpoint: config.get('aws.dynamodb.endpoint'),
     partition: config.get('aws.dynamodb.tableName'),
     createTable: config.get('aws.dynamodb.createTable'),
@@ -31,7 +33,8 @@ export class CatboxDynamodb {
     this.settings = applyToDefaults(internals.defaults, options)
     this.client = new DynamoDBClient({
       region: this.settings.region,
-      endpoint: this.settings.endpoint
+      endpoint: this.settings.endpoint,
+      credentials: this.settings.credentials
     })
     this.docClient = DynamoDBDocumentClient.from(this.client)
   }

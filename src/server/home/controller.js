@@ -29,7 +29,7 @@ export const homeController = {
     let allTimes
     try {
       allTimes = homeTime ? JSON.parse(JSON.parse(homeTime).timestamps) : []
-      request.logger.info(`Existing Home times: ${homeTime}`)
+      request.logger.info(`Existing Home times: ${allTimes}`)
     } catch (err) {
       request.logger.error('Error parsing cache', err)
       allTimes = []
