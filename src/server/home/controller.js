@@ -8,10 +8,15 @@ export const homeController = {
     request.logger.info('Home page requested')
     const cache = request.server.storer
     request.logger.info('Server Cache')
-    if (await cache.isReady()) {
-      request.logger.info('Cache is ready')
-    } else {
-      throw new Error('Cache is not ready')
+    try {
+      if (await cache.isReady()) {
+        request.logger.info('Cache is ready')
+      } else {
+        throw new Error('Cache is not ready')
+      }
+    } catch (err) {
+      request.logger.error('Cache blows up', err)
+      throw err
     }
     let homeTime
     try {

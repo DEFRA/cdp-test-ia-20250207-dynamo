@@ -47,19 +47,19 @@ export class CatboxDynamodb {
   }
 
   isReady() {
-    return true
-    //  const command = new DescribeTableCommand({
-    //    TableName: this.settings.partition
-    //  })
-    //  return this.client
-    //    .send(command)
-    //    .then(() => true)
-    //    .catch((err) => {
-    //      if (err.name === 'ResourceNotFoundException') {
-    //        return false
-    //      }
-    //      throw err
-    //    })
+    //  return true
+    const command = new DescribeTableCommand({
+      TableName: this.settings.partition
+    })
+    return this.client
+      .send(command)
+      .then(() => true)
+      .catch((err) => {
+        if (err.name === 'ResourceNotFoundException') {
+          return false
+        }
+        throw err
+      })
   }
 
   async start() {
