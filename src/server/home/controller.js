@@ -20,7 +20,6 @@ export const homeController = {
     let homeTime
     try {
       homeTime = await cache.get('home-times')
-      request.logger.info('Cache retrieved: ' + homeTime)
     } catch (err) {
       request.logger.error('Error retrieving cache', err)
       throw err
