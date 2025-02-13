@@ -14,6 +14,9 @@ import {
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers'
 
 import { config } from '~/src/config/config.js'
+import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
+
+const logger = createLogger()
 
 const internals = {
   defaults: {
@@ -30,6 +33,7 @@ const internals = {
 
 export class CatboxDynamodb {
   constructor(options = {}) {
+    logger.info('CatboxDynamodb constructor')
     this.settings = applyToDefaults(internals.defaults, options)
     this.client = new DynamoDBClient(this.settings)
     // region: this.settings.region,
@@ -37,6 +41,7 @@ export class CatboxDynamodb {
     // credentials: this.settings.credentials
     //  })
     this.docClient = DynamoDBDocumentClient.from(this.client)
+    logger.info('CatboxDynamodb constructed')
   }
 
   validateSegmentName(name) {
@@ -54,6 +59,7 @@ export class CatboxDynamodb {
     const command = new DescribeTableCommand({
       TableName: this.settings.partition
     })
+    logger.info('CatboxDynamodb isReady')
     return this.client
       .send(command)
       .then(() => true)
@@ -66,6 +72,7 @@ export class CatboxDynamodb {
   }
 
   async start() {
+    logger.info('CatboxDynamodb start')
     if (!this.settings.createTable) {
       return
     }
