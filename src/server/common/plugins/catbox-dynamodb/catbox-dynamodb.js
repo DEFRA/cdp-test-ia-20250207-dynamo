@@ -18,7 +18,7 @@ import { config } from '~/src/config/config.js'
 const internals = {
   defaults: {
     credentials: fromNodeProviderChain(),
-    endpoint: config.get('aws.dynamodb.endpoint'),
+    //  endpoint: config.get('aws.dynamodb.endpoint'),
     partition: config.get('aws.dynamodb.tableName'),
     createTable: config.get('aws.dynamodb.createTable'),
     ttl: config.get('session.cache.ttl'),
