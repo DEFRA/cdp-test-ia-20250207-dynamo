@@ -36,10 +36,6 @@ export class CatboxDynamodb {
     logger.info('CatboxDynamodb constructor')
     this.settings = applyToDefaults(internals.defaults, options)
     this.client = new DynamoDBClient(this.settings)
-    // region: this.settings.region,
-    // endpoint: this.settings.endpoint,
-    // credentials: this.settings.credentials
-    //  })
     this.docClient = DynamoDBDocumentClient.from(this.client)
     logger.info('CatboxDynamodb constructed')
   }
