@@ -1,193 +1,119 @@
 # cdp-test-ia-20250207-dynamo
 
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_cdp-test-ia-20250207-dynamo&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=DEFRA_cdp-test-ia-20250207-dynamo)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_cdp-test-ia-20250207-dynamo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_cdp-test-ia-20250207-dynamo)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_cdp-test-ia-20250207-dynamo&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_cdp-test-ia-20250207-dynamo)
 
-Core delivery platform Node.js Frontend Template.
+Testing a CDP frontend node app using DynamoDB as cache
 
-- [Requirements](#requirements)
-  - [Node.js](#nodejs)
-- [Server-side Caching](#server-side-caching)
-- [Redis](#redis)
-- [Local Development](#local-development)
-  - [Setup](#setup)
-  - [Development](#development)
-  - [Production](#production)
-  - [Npm scripts](#npm-scripts)
-  - [Update dependencies](#update-dependencies)
-  - [Formatting](#formatting)
-    - [Windows prettier issue](#windows-prettier-issue)
-- [Docker](#docker)
-  - [Development image](#development-image)
-  - [Production image](#production-image)
-  - [Docker Compose](#docker-compose)
-  - [Dependabot](#dependabot)
-  - [SonarCloud](#sonarcloud)
-- [Licence](#licence)
-  - [About the licence](#about-the-licence)
+## Libraries
 
-## Requirements
+New dependencies
 
-### Node.js
+* `@aws-sdk/client-dynamodb`
+* `@aws-sdk/credential-providers`
+* `@aws-sdk/lib-dynamodb`,
+* `@hapi/hoek`
 
-Please install [Node.js](http://nodejs.org/) `>= v18` and [npm](https://nodejs.org/) `>= v9`. You will find it
-easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm)
+## Local setup
 
-To use the correct version of Node.js for this application, via nvm:
+Added dynamodb to localstack in the compose file `~/compose.yml`
 
-```bash
-cd cdp-test-ia-20250207-dynamo
-nvm use
+```
+SERVICES: s3,sqs,sns,firehose,dynamodb
 ```
 
-## Server-side Caching
+## Config
 
-We use Catbox for server-side caching. By default the service will use CatboxRedis when deployed and CatboxMemory for
-local development.
-You can override the default behaviour by setting the `SESSION_CACHE_ENGINE` environment variable to either `redis` or
-`memory`.
+New configurations added in `config.js`
 
-Please note: CatboxMemory (`memory`) is _not_ suitable for production use! The cache will not be shared between each
-instance of the service and it will not persist between restarts.
-
-## Redis
-
-Redis is an in-memory key-value store. Every instance of a service has access to the same Redis key-value store similar
-to how services might have a database (or MongoDB). All frontend services are given access to a namespaced prefixed that
-matches the service name. e.g. `my-service` will have access to everything in Redis that is prefixed with `my-service`.
-
-If your service does not require a session cache to be shared between instances or if you don't require Redis, you can
-disable setting `SESSION_CACHE_ENGINE=false` or changing the default value in `~/src/config/index.js`.
-
-## Proxy
-
-We are using forward-proxy which is set up by default. To make use of this: `import { fetch } from 'undici'` then because of the `setGlobalDispatcher(new ProxyAgent(proxyUrl))` calls will use the ProxyAgent Dispatcher
-
-If you are not using Wreck, Axios or Undici or a similar http that uses `Request`. Then you may have to provide the proxy dispatcher:
-
-To add the dispatcher to your own client:
-
-```javascript
-import { ProxyAgent } from 'undici'
-
-return await fetch(url, {
-  dispatcher: new ProxyAgent({
-    uri: proxyUrl,
-    keepAliveTimeout: 10,
-    keepAliveMaxTimeout: 10
-  })
-})
+```
+aws: {
+   dynamodb: {
+      endpoint,
+      createTable,
+      tableName
+   },
+   region
+}
 ```
 
-## Local Development
-
-### Setup
-
-Install application dependencies:
-
-```bash
-npm install
+Modified
+```
+session: {
+   cache: {
+      engine
+   }
+}
 ```
 
-### Development
+Overrode some local ephemeral env-vars (`.envrc`)
 
-To run the application in `development` mode run:
-
-```bash
-npm run dev
+```
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+export AWS_REGION=eu-west-2
+export AWS_DYNAMODB_ENDPOINT=http://localhost:4566
+export SESSION_CACHE_ENGINE=dynamodb // comment this for tests to pass
+export AWS_DYNAMODB_CREATE_TABLE=true
 ```
 
-### Production
+## Code
 
-To mimic the application running in `production` mode locally run:
+* `~/src/server/index.js`
+  Added a cache object called `storer`
+  to access the cache API
 
-```bash
-npm start
-```
+* `~/src/server/common/helpers/session-cache/cache-engine.js`
+  Imported the `CatboxDynamodb` class.
+  Added *dynamodb* as an option.
 
-### Npm scripts
 
-All available Npm scripts can be seen in [package.json](./package.json)
-To view them in your command line run:
+* `~/src/server/common/plugins/catbox-dynamodb/catbox-dynamodb.js`
+  Created `CatboxDynamodb` class.
 
-```bash
-npm run
-```
+* `~/src/home/controller.js`
+  Lots of try catch.
+  Reads from `storer` cache object.
+  Stores an array of timestamps.
 
-### Update dependencies
 
-To update dependencies use [npm-check-updates](https://github.com/raineorshine/npm-check-updates):
+## CatboxDynamodb class
 
-> The following script is a good start. Check out all the options on
-> the [npm-check-updates](https://github.com/raineorshine/npm-check-updates)
+* Followed similar API to *catbox-redis* and *catbox-memory*.
 
-```bash
-ncu --interactive --format group
-```
+* Lots of logging whilst debugging, can now be removed.
 
-### Formatting
+* Note the IAM creds via `fromNodeProviderChain` from `credential-providers`
 
-#### Windows prettier issue
+* *Endpoint* in config is an important override between localstack and the real thing.
 
-If you are having issues with formatting of line breaks on Windows update your global git config by running:
+* *Segment* is currently ignored.
 
-```bash
-git config --global core.autocrlf false
-```
+* Locally can create the table if needed
 
-## Docker
+* `stop()` does not really have a purpose
 
-### Development image
+* Note the input and output is intercepted by Catbox so `key` is an object
+  ```
+  key {
+   id, segment
+  }
+  ```
+  And response to `get()` has to be:
+  ```
+  {
+   id, item, stored, ttl
+  }
+  ```
 
-Build:
 
-```bash
-docker build --target development --no-cache --tag cdp-test-ia-20250207-dynamo:development .
-```
+## CDP environment
+ (infra-dev)
 
-Run:
+### IAM Policy
 
-```bash
-docker run -p 3000:3000 cdp-test-ia-20250207-dynamo:development
-```
+* Clickopsed a new dynamodb policy for the tables
+* Added it to the service role
 
-### Production image
-
-Build:
-
-```bash
-docker build --no-cache --tag cdp-test-ia-20250207-dynamo .
-```
-
-Run:
-
-```bash
-docker run -p 3000:3000 cdp-test-ia-20250207-dynamo
-```
-
-### Docker Compose
-
-A local environment with:
-
-- Localstack for AWS services (S3, SQS)
-- Redis
-- MongoDB
-- This service.
-- A commented out backend example.
-
-```bash
-docker compose up --build -d
-```
-
-### Dependabot
-
-We have added an example dependabot configuration file to the repository. You can enable it by renaming
-the [.github/example.dependabot.yml](.github/example.dependabot.yml) to `.github/dependabot.yml`
-
-### SonarCloud
-
-Instructions for setting up SonarCloud can be found in [sonar-project.properties](./sonar-project.properties).
+* Infra also clickopsed some gateway. Ticket created to codify in terraform.
 
 ## Licence
 

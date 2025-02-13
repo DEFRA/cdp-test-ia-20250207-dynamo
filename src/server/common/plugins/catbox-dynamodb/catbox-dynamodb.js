@@ -33,11 +33,9 @@ const internals = {
 
 export class CatboxDynamodb {
   constructor(options = {}) {
-    logger.info('CatboxDynamodb constructor')
     this.settings = applyToDefaults(internals.defaults, options)
     this.client = new DynamoDBClient(this.settings)
     this.docClient = DynamoDBDocumentClient.from(this.client)
-    logger.info('CatboxDynamodb constructed')
   }
 
   validateSegmentName(name) {
@@ -51,11 +49,10 @@ export class CatboxDynamodb {
   }
 
   isReady() {
-    //  return true
     const command = new DescribeTableCommand({
       TableName: this.settings.partition
     })
-    logger.info('CatboxDynamodb isReady')
+    logger.info('In CatboxDynamodb isReady')
     return this.client
       .send(command)
       .then(() => true)
@@ -68,7 +65,6 @@ export class CatboxDynamodb {
   }
 
   async start() {
-    logger.info('CatboxDynamodb start')
     if (!this.settings.createTable) {
       return
     }

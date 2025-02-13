@@ -7,7 +7,6 @@ export const homeController = {
   handler: async (request, h) => {
     request.logger.info('Home page requested')
     const cache = request.server.storer
-    request.logger.info('Server Cache')
     try {
       if (await cache.isReady()) {
         request.logger.info('Cache is ready')
