@@ -1,4 +1,5 @@
 import hapi from '@hapi/hapi'
+import { config } from '~/src/config/config.js'
 
 const mockLoggerInfo = jest.fn()
 const mockLoggerError = jest.fn()
@@ -30,8 +31,8 @@ describe('#startServer', () => {
   let createServerImport
 
   beforeAll(async () => {
-    process.env = { ...PROCESS_ENV }
-    process.env.PORT = '3097' // Set to obscure port to avoid conflicts
+    config.set('session.cache.engine', 'memory')
+    config.set('port', '3097')
 
     createServerImport = await import('~/src/server/index.js')
     startServerImport = await import(
@@ -78,6 +79,7 @@ describe('#startServer', () => {
 
   describe('When server start fails', () => {
     beforeAll(() => {
+      config.set('session.cache.engine', 'memory')
       createServerSpy.mockRejectedValue(new Error('Server failed to start'))
     })
 

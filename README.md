@@ -1,16 +1,15 @@
 # cdp-test-ia-20250207-dynamo
 
-
 Testing a CDP frontend node app using DynamoDB as cache
 
 ## Libraries
 
 New dependencies
 
-* `@aws-sdk/client-dynamodb`
-* `@aws-sdk/credential-providers`
-* `@aws-sdk/lib-dynamodb`,
-* `@hapi/hoek`
+- `@aws-sdk/client-dynamodb`
+- `@aws-sdk/credential-providers`
+- `@aws-sdk/lib-dynamodb`,
+- `@hapi/hoek`
 
 ## Local setup
 
@@ -36,6 +35,7 @@ aws: {
 ```
 
 Modified
+
 ```
 session: {
    cache: {
@@ -57,41 +57,39 @@ export AWS_DYNAMODB_CREATE_TABLE=true
 
 ## Code
 
-* `~/src/server/index.js`
+- `~/src/server/index.js`
   Added a cache object called `storer`
   to access the cache API
 
-* `~/src/server/common/helpers/session-cache/cache-engine.js`
+- `~/src/server/common/helpers/session-cache/cache-engine.js`
   Imported the `CatboxDynamodb` class.
-  Added *dynamodb* as an option.
+  Added _dynamodb_ as an option.
 
-
-* `~/src/server/common/plugins/catbox-dynamodb/catbox-dynamodb.js`
+- `~/src/server/common/plugins/catbox-dynamodb/catbox-dynamodb.js`
   Created `CatboxDynamodb` class.
 
-* `~/src/home/controller.js`
+- `~/src/home/controller.js`
   Lots of try catch.
   Reads from `storer` cache object.
   Stores an array of timestamps.
 
-
 ## CatboxDynamodb class
 
-* Followed similar API to *catbox-redis* and *catbox-memory*.
+- Followed similar API to _catbox-redis_ and _catbox-memory_.
 
-* Lots of logging whilst debugging, can now be removed.
+- Lots of logging whilst debugging, can now be removed.
 
-* Note the IAM creds via `fromNodeProviderChain` from `credential-providers`
+- Note the IAM creds via `fromNodeProviderChain` from `credential-providers`
 
-* *Endpoint* in config is an important override between localstack and the real thing.
+- _Endpoint_ in config is an important override between localstack and the real thing.
 
-* *Segment* is currently ignored.
+- _Segment_ is currently ignored.
 
-* Locally can create the table if needed
+- Locally can create the table if needed
 
-* `stop()` does not really have a purpose
+- `stop()` does not really have a purpose
 
-* Note the input and output is intercepted by Catbox so `key` is an object
+- Note the input and output is intercepted by Catbox so `key` is an object
   ```
   key {
    id, segment
@@ -104,16 +102,16 @@ export AWS_DYNAMODB_CREATE_TABLE=true
   }
   ```
 
-
 ## CDP environment
- (infra-dev)
+
+(infra-dev)
 
 ### IAM Policy
 
-* Clickopsed a new dynamodb policy for the tables
-* Added it to the service role
+- Clickopsed a new dynamodb policy for the tables
+- Added it to the service role
 
-* Infra also clickopsed some gateway. Ticket created to codify in terraform.
+- Infra also clickopsed some gateway. Ticket created to codify in terraform.
 
 ## Licence
 

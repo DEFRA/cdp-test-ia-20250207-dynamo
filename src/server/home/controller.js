@@ -26,17 +26,14 @@ export const homeController = {
     }
     let allTimes
     try {
-      allTimes = homeTime ? JSON.parse(JSON.parse(homeTime).timestamps) : []
+      allTimes = homeTime || []
       request.logger.info(`Existing Home times: ${allTimes}`)
     } catch (err) {
       request.logger.error('Error parsing cache', err)
       allTimes = []
     }
     allTimes.push(new Date().toISOString())
-    await cache.set(
-      'home-times',
-      JSON.stringify({ timestamps: JSON.stringify(allTimes) })
-    )
+    await cache.set('home-times', allTimes)
 
     return h.view('home/index', {
       pageTitle: 'Home',

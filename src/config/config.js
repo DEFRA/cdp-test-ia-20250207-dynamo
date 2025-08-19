@@ -53,6 +53,18 @@ export const config = convict({
     default: '/public',
     env: 'ASSET_PATH'
   },
+  awsRegion: {
+    doc: 'AWS region',
+    format: String,
+    default: 'eu-west-2',
+    env: 'AWS_REGION'
+  },
+  dynamoDbEndpoint: {
+    doc: 'AWS DynamoDB endpoint',
+    format: String,
+    default: 'http://127.0.0.1:4566',
+    env: 'DYNAMODB_ENDPOINT'
+  },
   isProduction: {
     doc: 'If this application running in the production environment',
     format: Boolean,
@@ -114,42 +126,12 @@ export const config = convict({
     default: isProduction,
     env: 'ENABLE_METRICS'
   },
-  aws: {
-    dynamodb: {
-      endpoint: {
-        doc: 'AWS DynamoDB endpoint',
-        format: String,
-        default: 'http://localhost:4566',
-        env: 'AWS_DYNAMODB_ENDPOINT'
-      },
-      createTable: {
-        doc: 'Create the table if it does not exist',
-        format: Boolean,
-        default: !isProduction,
-        env: 'AWS_DYNAMODB_CREATE_TABLE'
-      },
-      tableName: {
-        doc: 'AWS DynamoDB table name',
-        format: String,
-        default: 'session-cache',
-        env: 'AWS_DYNAMODB_TABLE_NAME'
-      }
-    },
-    region: {
-      doc: 'AWS region',
-      format: String,
-      default: 'eu-west-2',
-      env: 'AWS_REGION'
-    }
-  },
   session: {
     cache: {
       engine: {
         doc: 'backend cache is written to',
-        //   format: ['redis', 'memory'],
-        //   default: isProduction ? 'redis' : 'memory',
-        format: ['dynamodb', 'memory'],
-        default: isProduction ? 'dynamodb' : 'memory',
+        format: ['dynamodb', 'redis', 'memory'],
+        default: 'dynamodb',
         env: 'SESSION_CACHE_ENGINE'
       },
       name: {
@@ -226,6 +208,14 @@ export const config = convict({
       env: 'REDIS_TLS'
     }
   }),
+  dynamoDb: {
+    tableName: {
+      doc: 'AWS DynamoDB table name',
+      format: String,
+      default: 'test-session-cache',
+      env: 'AWS_DYNAMODB_TABLE_NAME'
+    }
+  },
   nunjucks: {
     watch: {
       doc: 'Reload templates when they are changed.',
