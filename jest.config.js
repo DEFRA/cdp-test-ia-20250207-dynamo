@@ -28,6 +28,7 @@ export default {
   transformIgnorePatterns: [
     `node_modules/(?!${[
       '@defra/hapi-tracing', // Supports ESM only
+      '@defra/catbox-dynamo', // Supports ESM only
       'node-fetch' // Supports ESM only
     ].join('|')}/)`
   ]

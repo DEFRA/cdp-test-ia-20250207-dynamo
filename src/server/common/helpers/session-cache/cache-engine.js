@@ -1,11 +1,9 @@
 import { buildRedisClient } from '~/src/server/common/helpers/redis-client.js'
 import { Engine as CatboxRedis } from '@hapi/catbox-redis'
 import { Engine as CatboxMemory } from '@hapi/catbox-memory'
-
-import { CatboxDynamodb } from '~/src/server/common/plugins/catbox-dynamodb/catbox-dynamodb.js'
-
 import { config } from '~/src/config/config.js'
 import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
+import { CatboxDynamoDB } from '@defra/catbox-dynamodb'
 
 /**
  * @typedef {'redis' | 'dynamodb' | 'memory'} Engine
@@ -13,7 +11,7 @@ import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 
 /**
  * @param {Engine} [engine]
- * @returns CatboxRedis |  CatboxDynamodb | CatboxMemory
+ * @returns CatboxRedis | CatboxDynamodb | CatboxMemory
  */
 export function getCacheEngine(engine) {
   const logger = createLogger()
@@ -26,7 +24,15 @@ export function getCacheEngine(engine) {
 
   if (engine === 'dynamodb') {
     logger.info('Using DynamoDB session cache')
-    return new CatboxDynamodb()
+    return new CatboxDynamoDB({
+      tableName: config.get('dynamoDb.tableName'),
+      ttl: config.get('session.cache.ttl'),
+      clientOptions: {
+        endpoint: config.get('dynamoDbEndpoint'),
+        region: config.get('awsRegion')
+      },
+      logger
+    })
   }
 
   if (config.get('isProduction')) {
